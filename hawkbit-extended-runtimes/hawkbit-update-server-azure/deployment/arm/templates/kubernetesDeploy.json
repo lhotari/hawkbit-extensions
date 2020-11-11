@@ -161,7 +161,8 @@
   },
   "variables": {
     "publicIPRef": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('publicIPAddressName'))]",
-    "vnetSubnetId": "[resourceId(parameters('virtualNetworkResourceGroup'),'Microsoft.Network/virtualNetworks/subnets',parameters('virtualNetworkName'),parameters('subnetName'))]"
+    "vnetSubnetId": "[resourceId(parameters('virtualNetworkResourceGroup'),'Microsoft.Network/virtualNetworks/subnets',parameters('virtualNetworkName'),parameters('subnetName'))]",
+    "defaultSubnetRoleAssignmentName": "[concat(parameters('virtualNetworkName'), '/', parameters('subnetName'), '/Microsoft.Authorization/', guid(resourceGroup().id, deployment().name))]"
   },
   "resources": [
     {
@@ -231,7 +232,7 @@
             {
               "type": "Microsoft.Network/virtualNetworks/subnets/providers/roleAssignments",
               "apiVersion": "2017-09-01",
-              "name": "[guid(resourceGroup().id, deployment().name)]",
+              "name": "[variables('defaultSubnetRoleAssignmentName')]",
               "properties": {
                 "scope": "[variables('vnetSubnetId')]",
                 "principalId": "[reference(parameters('clusterName')).identityProfile.kubeletidentity.objectId]",
