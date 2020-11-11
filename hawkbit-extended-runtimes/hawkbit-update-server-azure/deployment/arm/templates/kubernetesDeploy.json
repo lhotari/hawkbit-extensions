@@ -1,10 +1,10 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
     "kubernetesVersion": {
       "type": "string",
-      "defaultValue": "1.17.9",
+      "defaultValue": "1.18.10",
       "metadata": {
         "description": "Kubernetes version."
       }
@@ -46,7 +46,7 @@
     },
     "agentCount": {
       "type": "int",
-      "defaultValue": 3,
+      "defaultValue": 2,
       "metadata": {
         "description": "The number of nodes for the cluster."
       },
@@ -60,23 +60,12 @@
         "description": "The size of the Virtual Machine."
       }
     },
-    "servicePrincipalObjectId": {
-      "type": "securestring",
+    "identityName": {
+      "defaultValue": "[concat('id-', uniqueString(resourceGroup().id))]",
+      "type": "string",
       "metadata": {
-        "description": "Object ID against which the Network Contributor roles will be assigned on the subnet"
+          "description": "Name of the user assigned identity"
       }
-    },
-    "servicePrincipalClientId": {
-      "metadata": {
-        "description": "Client ID (used by cloudprovider)"
-      },
-      "type": "securestring"
-    },
-    "servicePrincipalClientSecret": {
-      "metadata": {
-        "description": "The Service Principal Client Secret."
-      },
-      "type": "securestring"
     },
     "osType": {
       "type": "string",
@@ -179,19 +168,25 @@
   },
   "variables": {
     "publicIPRef": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('publicIPAddressName'))]",
-    "vnetSubnetId": "[resourceId(parameters('virtualNetworkResourceGroup'),'Microsoft.Network/virtualNetworks/subnets',parameters('virtualNetworkName'),parameters('subnetName'))]"
+    "vnetSubnetId": "[resourceId(parameters('virtualNetworkResourceGroup'),'Microsoft.Network/virtualNetworks/subnets',parameters('virtualNetworkName'),parameters('subnetName'))]",
+    "identityID": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('identityName'))]"
   },
   "resources": [
     {
-      "apiVersion": "2019-06-01",
+      "apiVersion": "2020-06-01",
       "type": "Microsoft.ContainerService/managedClusters",
       "location": "[parameters('location')]",
       "name": "[parameters('clusterName')]",
       "tags": {},
       "dependsOn": [
-        "[concat('Microsoft.Resources/deployments/', 'ClusterResourceGroupRoleAssignmentDeployment')]",
-        "[concat('Microsoft.Network/publicIPAddresses/', parameters('publicIPAddressName'))]",
+        "[concat('Microsoft.Network/publicIPAddresses/', parameters('publicIPAddressName'))]"
       ],
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+            "[variables('identityID')]": {}
+        }
+      },
       "properties": {
         "dnsPrefix": "[parameters('dnsPrefix')]",
         "enableRBAC": "[parameters('enableRBAC')]",
@@ -204,25 +199,29 @@
         "agentPoolProfiles": [
           {
             "name": "agentpool",
+            "orchestratorVersion": "[parameters('kubernetesVersion')]",
             "osDiskSizeGB": "[parameters('osDiskSizeGB')]",
             "count": "[parameters('agentCount')]",
             "vmSize": "[parameters('agentVMSize')]",
             "osType": "[parameters('osType')]",
             "storageProfile": "ManagedDisks",
-            "vnetSubnetID": "[variables('vnetSubnetID')]",
-            "maxPods": "[parameters('maxPods')]"
+            "vnetSubnetID": "[variables('vnetSubnetId')]",
+            "maxPods": "[parameters('maxPods')]",
+            "mode": "System",
+            "type": "VirtualMachineScaleSets"
           }
         ],
         "servicePrincipalProfile": {
-          "clientId": "[parameters('servicePrincipalClientId')]",
-          "Secret": "[parameters('servicePrincipalClientSecret')]"
+          "clientId": "msi"
         },
         "networkProfile": {
           "networkPlugin": "[parameters('networkPlugin')]",
           "networkPolicy": "[parameters('networkPolicy')]",
           "serviceCidr": "[parameters('serviceCidr')]",
           "dnsServiceIP": "[parameters('dnsServiceIP')]",
-          "dockerBridgeCidr": "[parameters('dockerBridgeCidr')]"
+          "dockerBridgeCidr": "[parameters('dockerBridgeCidr')]",
+          "loadBalancerSku": "standard",
+          "outboundType": "loadBalancer"
         }
       }
     },
@@ -241,27 +240,26 @@
           "variables": {},
           "resources": [
             {
-              "type": "Microsoft.Authorization/roleAssignments",
+              "type": "Microsoft.Network/virtualNetworks/subnets/providers/roleAssignments",
               "apiVersion": "2017-05-01",
               "name": "[guid(resourceGroup().id, deployment().name)]",
               "properties": {
-                "scope": "[resourceGroup().id]",
-                "principalId": "[parameters('servicePrincipalObjectId')]",
+                "scope": "[variables('vnetSubnetId')]",
+                "principalId": "[reference(parameters('clusterName')).identityProfile.kubeletidentity.objectId]",
                 "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', '4d97b98b-1d4f-4787-a291-c67834d212e7')]"
               }
             }
           ]
         }
-      }
+      },
+      "dependsOn": []
     },
     {
       "apiVersion": "2017-06-01",
       "type": "Microsoft.Network/publicIPAddresses",
       "name": "[parameters('publicIPAddressName')]",
       "location": "[parameters('location')]",
-      "dependsOn": [
-        "[concat('Microsoft.Resources/deployments/', 'ClusterResourceGroupRoleAssignmentDeployment')]"
-      ],
+      "dependsOn": [],
       "properties": {
         "publicIPAllocationMethod": "Static",
         "dnsSettings": {

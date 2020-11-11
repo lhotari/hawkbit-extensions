@@ -57,23 +57,12 @@
                 "description": "Location for all resources."
             }
         },
-        "servicePrincipalObjectId": {
-            "type": "securestring",
+        "identityName": {
+            "defaultValue": "[concat('id-', uniqueString(resourceGroup().id))]",
+            "type": "string",
             "metadata": {
-                "description": "Object ID against which the Network Contributor roles will be assigned on the subnet"
+                "description": "Name of the user assigned identity"
             }
-        },
-        "servicePrincipalClientId": {
-            "metadata": {
-                "description": "Client ID (used by cloudprovider)"
-            },
-            "type": "securestring"
-        },
-        "servicePrincipalClientSecret": {
-            "metadata": {
-                "description": "The Service Principal Client Secret."
-            },
-            "type": "securestring"
         },
         "storageAccountType": {
             "type": "string",
@@ -132,7 +121,7 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "https://raw.githubusercontent.com/eclipse/hawkbit-extensions/master/hawkbit-extended-runtimes/hawkbit-update-server-azure/deployment/arm/templates/storageDeploy.json"
+                    "uri": "https://raw.githubusercontent.com/lhotari/hawkbit-extensions/managed-identity/hawkbit-extended-runtimes/hawkbit-update-server-azure/deployment/arm/templates/storageDeploy.json"
                 },
                 "parameters": {
                     "storageAccountName": {
@@ -165,7 +154,7 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "https://raw.githubusercontent.com/eclipse/hawkbit-extensions/master/hawkbit-extended-runtimes/hawkbit-update-server-azure/deployment/arm/templates/sqlServerDeploy.json"
+                    "uri": "https://raw.githubusercontent.com/lhotari/hawkbit-extensions/managed-identity/hawkbit-extended-runtimes/hawkbit-update-server-azure/deployment/arm/templates/sqlServerDeploy.json"
                 },
                 "parameters": {
                     "dbServerName": {
@@ -198,7 +187,7 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "https://raw.githubusercontent.com/eclipse/hawkbit-extensions/master/hawkbit-extended-runtimes/hawkbit-update-server-azure/deployment/arm/templates/ehNamespaceDeploy.json"
+                    "uri": "https://raw.githubusercontent.com/lhotari/hawkbit-extensions/managed-identity/hawkbit-extended-runtimes/hawkbit-update-server-azure/deployment/arm/templates/ehNamespaceDeploy.json"
                 },
                 "parameters": {
                     "namespaceName": {
@@ -226,7 +215,7 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "https://raw.githubusercontent.com/eclipse/hawkbit-extensions/master/hawkbit-extended-runtimes/hawkbit-update-server-azure/deployment/arm/templates/vnetDeploy.json"
+                    "uri": "https://raw.githubusercontent.com/lhotari/hawkbit-extensions/managed-identity/hawkbit-extended-runtimes/hawkbit-update-server-azure/deployment/arm/templates/vnetDeploy.json"
                 },
                 "parameters": {
                     "vnetName": {
@@ -252,7 +241,7 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "https://raw.githubusercontent.com/eclipse/hawkbit-extensions/master/hawkbit-extended-runtimes/hawkbit-update-server-azure/deployment/arm/templates/kubernetesDeploy.json"
+                    "uri": "https://raw.githubusercontent.com/lhotari/hawkbit-extensions/managed-identity/hawkbit-extended-runtimes/hawkbit-update-server-azure/deployment/arm/templates/kubernetesDeploy.json"
                 },
                 "parameters": {
                     "clusterName": {
@@ -264,14 +253,8 @@
                     "dnsPrefix": {
                         "value": "[parameters('uniqueSolutionPrefix')]"
                     },
-                    "servicePrincipalObjectId": {
-                        "value": "[parameters('servicePrincipalObjectId')]"
-                    },
-                    "servicePrincipalClientId": {
-                        "value": "[parameters('servicePrincipalClientId')]"
-                    },
-                    "servicePrincipalClientSecret": {
-                        "value": "[parameters('servicePrincipalClientSecret')]"
+                    "identityName": {
+                        "value": "[parameters('identityName')]"
                     },
                     "virtualNetworkName": {
                         "value": "[variables('vnetName')]"
