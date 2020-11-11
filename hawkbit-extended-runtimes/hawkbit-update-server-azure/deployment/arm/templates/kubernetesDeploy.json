@@ -60,13 +60,6 @@
         "description": "The size of the Virtual Machine."
       }
     },
-    "identityName": {
-      "defaultValue": "[concat('id-', uniqueString(resourceGroup().id))]",
-      "type": "string",
-      "metadata": {
-          "description": "Name of the user assigned identity"
-      }
-    },
     "osType": {
       "type": "string",
       "defaultValue": "Linux",
@@ -168,8 +161,7 @@
   },
   "variables": {
     "publicIPRef": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('publicIPAddressName'))]",
-    "vnetSubnetId": "[resourceId(parameters('virtualNetworkResourceGroup'),'Microsoft.Network/virtualNetworks/subnets',parameters('virtualNetworkName'),parameters('subnetName'))]",
-    "identityID": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('identityName'))]"
+    "vnetSubnetId": "[resourceId(parameters('virtualNetworkResourceGroup'),'Microsoft.Network/virtualNetworks/subnets',parameters('virtualNetworkName'),parameters('subnetName'))]"
   },
   "resources": [
     {
@@ -182,10 +174,7 @@
         "[concat('Microsoft.Network/publicIPAddresses/', parameters('publicIPAddressName'))]"
       ],
       "identity": {
-        "type": "UserAssigned",
-        "userAssignedIdentities": {
-            "[variables('identityID')]": {}
-        }
+        "type": "SystemAssigned"
       },
       "properties": {
         "dnsPrefix": "[parameters('dnsPrefix')]",

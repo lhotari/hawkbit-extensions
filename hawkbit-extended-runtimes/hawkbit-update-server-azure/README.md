@@ -71,12 +71,9 @@ resourcegroup_name=$acr_resourcegroupname
 acr_registry_name=hawkbit
 unique_solution_prefix=hawkbit
 
-# create managed identity with default name
-az deployment group create --name managedIdentity --resource-group $resourcegroup_name --template-file arm/managedIdentity.json --parameters identityName=id-hawkBitDemo
+az deployment group validate --name hawkBitBasicInfrastructure --resource-group $resourcegroup_name --template-file arm/hawkBitInfrastructureDeployment.json --parameters uniqueSolutionPrefix=$unique_solution_prefix
 
-az deployment group validate --name hawkBitBasicInfrastructure --resource-group $resourcegroup_name --template-file arm/hawkBitInfrastructureDeployment.json --parameters uniqueSolutionPrefix=$unique_solution_prefix identityName=id-hawkBitDemo
-
-az deployment group create --name hawkBitBasicInfrastructure --resource-group $resourcegroup_name --template-file arm/hawkBitInfrastructureDeployment.json --parameters uniqueSolutionPrefix=$unique_solution_prefix identityName=id-hawkBitDemo
+az deployment group create --name hawkBitBasicInfrastructure --resource-group $resourcegroup_name --template-file arm/hawkBitInfrastructureDeployment.json --parameters uniqueSolutionPrefix=$unique_solution_prefix
 ```
 
 Retrieve secrets from the deployment:

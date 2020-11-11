@@ -57,13 +57,6 @@
                 "description": "Location for all resources."
             }
         },
-        "identityName": {
-            "defaultValue": "[concat('id-', uniqueString(resourceGroup().id))]",
-            "type": "string",
-            "metadata": {
-                "description": "Name of the user assigned identity"
-            }
-        },
         "storageAccountType": {
             "type": "string",
             "defaultValue": "Standard_LRS",
@@ -252,9 +245,6 @@
                     },
                     "dnsPrefix": {
                         "value": "[parameters('uniqueSolutionPrefix')]"
-                    },
-                    "identityName": {
-                        "value": "[parameters('identityName')]"
                     },
                     "virtualNetworkName": {
                         "value": "[variables('vnetName')]"
