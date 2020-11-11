@@ -217,7 +217,7 @@
     {
       "type": "Microsoft.Resources/deployments",
       "name": "ClusterResourceGroupRoleAssignmentDeployment",
-      "apiVersion": "2017-05-10",
+      "apiVersion": "2018-05-01",
       "subscriptionId": "[subscription().subscriptionId]",
       "resourceGroup": "[parameters('virtualNetworkResourceGroup')]",
       "properties": {
@@ -230,7 +230,7 @@
           "resources": [
             {
               "type": "Microsoft.Network/virtualNetworks/subnets/providers/roleAssignments",
-              "apiVersion": "2017-05-01",
+              "apiVersion": "2017-09-01",
               "name": "[guid(resourceGroup().id, deployment().name)]",
               "properties": {
                 "scope": "[variables('vnetSubnetId')]",
@@ -241,7 +241,9 @@
           ]
         }
       },
-      "dependsOn": []
+      "dependsOn": [
+        "[concat('Microsoft.ContainerService/managedClusters/', parameters('clusterName'))]"
+      ]
     },
     {
       "apiVersion": "2017-06-01",
