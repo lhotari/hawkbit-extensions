@@ -210,7 +210,7 @@
           "serviceCidr": "[parameters('serviceCidr')]",
           "dnsServiceIP": "[parameters('dnsServiceIP')]",
           "dockerBridgeCidr": "[parameters('dockerBridgeCidr')]",
-          "loadBalancerSku": "standard",
+          "loadBalancerSku": "basic",
           "outboundType": "loadBalancer"
         }
       }
