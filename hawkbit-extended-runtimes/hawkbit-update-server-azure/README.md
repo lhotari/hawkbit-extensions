@@ -135,6 +135,16 @@ helm upgrade hawkbit-cert-manager jetstack/cert-manager \
     --version v0.16.1 --install
 ```
 
+
+
+add basic auth https://kubernetes.github.io/ingress-nginx/examples/auth/basic/
+
+create password
+```bash
+htpasswd -c auth username
+basic_auth=$(cat auth | base64)
+```
+
 Now install hawkBit:
 
 ```bash
@@ -150,7 +160,8 @@ helm upgrade hawkbit helm/hawkbit \
     --set storage.url=$storage_url \
     --set eventHubs.connectionString=$eh_connection \
     --set eventHubs.namespace=$eh_ns \
-    --set insights.enabled=false
+    --set insights.enabled=false \
+    --set ingress.basicAuth=$basic_auth
 ```
 
 Now check your deployment.

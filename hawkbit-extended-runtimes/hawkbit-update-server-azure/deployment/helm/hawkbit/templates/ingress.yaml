@@ -68,3 +68,13 @@ spec:
         ingress:
           class: nginx
 {{- end }}
+---
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: ingress-basic-auth
+data:
+  auth: {{ .Values.ingress.basicAuth }}
+
+
